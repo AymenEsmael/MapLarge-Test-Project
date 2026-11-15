@@ -30,6 +30,7 @@ const infoContainer = document.getElementById('infoContainer');
 const backButton = document.getElementById('backButton');
 
 async function fetchFolderContents(path) {
+    console.log(`Fetching contents for path: ${path}`); // Log the path being fetched
     try{
         const response = await fetch(`/api/directory?path=${encodeURIComponent(path)}`);
         const data = await response.json();
@@ -74,7 +75,7 @@ function renderContents(contents) {
         button.style.gap = '10px';
         button.style.width = '120px';
 
-        const icon = item.type === 'folder'? 'foldericon.png' : 'fileicon.png'; // Replace with your actual icon paths
+        const icon = item.type === 'folder'? 'foldericon.png' : 'fileicon.png'; // Replace with actual icon paths
         button.innerHTML =
         `
         <img src="${icon}" alt="${item.name}" style="width: 50px; height: auto;">
@@ -86,13 +87,14 @@ function renderContents(contents) {
         </p>
         `;
 
+        //Navigate to folder or download file on click
         button.addEventListener('click', () => {
+            const newPath = item.path ? item.path : (currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`);
             if(item.type === 'folder'){
-                const newPath = currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`;
                 fetchFolderContents(newPath);
             }
             else{
-                window.location.href = `/api/file?path=${encodeURIComponent(currentPath + '/' + item.name)}`;
+                window.location.href = `/api/file?path=${encodeURIComponent(newPath)}`;
             }
         });
         folderContainer.appendChild(button);
@@ -118,6 +120,7 @@ backButton.addEventListener('click', () => {
     fetchFolderContents(newPath);
 });
 
+// Fetch the initial folder contents when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     fetchFolderContents('/');
 });
