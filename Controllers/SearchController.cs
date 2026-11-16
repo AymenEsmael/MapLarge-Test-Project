@@ -1,8 +1,5 @@
 
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System;
-using System.Linq;
 
 namespace TestProject.Controllers
 {
@@ -14,13 +11,17 @@ namespace TestProject.Controllers
         [HttpGet]
         public IActionResult SearchFiles([FromQuery] string query)
         {
+
             if (string.IsNullOrWhiteSpace(query)) return BadRequest("Search can not be empty");
             try
             {
+                DirectoryController dController = new DirectoryController();
                 var searchPath = Path.Combine(Directory.GetCurrentDirectory(), "storage"); // Start searching from the storage directory
                 string[] matchingFiles = Directory.GetFiles(searchPath, $"*{query}*", SearchOption.AllDirectories);
                 string[] matchingDirectories = Directory.GetDirectories(searchPath, $"*{query}*", SearchOption.AllDirectories);
 
+                long totalSize = matchingFiles.Sum(f => new FileInfo(f).Length);
+                
                 var result = matchingFiles.Select(f => new
                 {
                     Name = Path.GetFileName(f),
@@ -39,7 +40,7 @@ namespace TestProject.Controllers
                 {
                     totalFolders = matchingDirectories.Length,
                     totalFiles = matchingFiles.Length,
-                    totalSize = "Search Results"
+                    totalSize = dController.ByteFormat(totalSize)
                 };
 
                 return Ok(new

@@ -32,6 +32,14 @@ async function searchFiles(){
         const data = await response.json();
         console.log(data)
 
+        if (data.stats.totalFolders === 0 && data.stats.totalFiles === 0){
+            alert("No item was found");
+            return;
+        }
+        else{
+            alert("The following item was found");
+        }
+
         // data.content.map(d => fetchFolderContents(d.path));
         renderContents(data.contents);
         updateStats(data.stats);

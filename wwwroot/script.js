@@ -29,13 +29,18 @@ const folderContainer = document.getElementById('folderContainer');
 const infoContainer = document.getElementById('infoContainer');
 const backButton = document.getElementById('backButton');
 
-async function fetchFolderContents(path) {
+async function fetchFolderContents(path, pushToHistory=true) {
     console.log(`Fetching contents for path: ${path}`); // Log the path being fetched
     try{
-        const response = await fetch(`/api/directory?path=${encodeURIComponent(path)}`);
+        const response = await fetch(`/api/directory?path=${encodeURI(path)}`);
         const data = await response.json();
 
         currentPath = path;//set the current path to the new path
+
+        if (pushToHistory){
+            const newurl = currentPath === '/' ? '/' : `/?path=${encodeURI(currentPath)}`;
+            window.history.pushState({savedPath: currentPath}, "", newurl);
+        }
         
         //render the UI with the new contents and stats
         console.log('Fetched data:', data); // Log the fetched data for debugging
@@ -94,7 +99,7 @@ function renderContents(contents) {
                 fetchFolderContents(newPath);
             }
             else{
-                window.location.href = `/api/file?path=${encodeURIComponent(newPath)}`;
+                window.location.href = `/api/file?path=${encodeURI(newPath)}`;
             }
         });
         folderContainer.appendChild(button);
@@ -122,5 +127,12 @@ backButton.addEventListener('click', () => {
 
 // Fetch the initial folder contents when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    fetchFolderContents('/');
+    const urlParam = new URLSearchParams(window.location.search);
+    const startPath = urlParam.get('path') || '/'
+    fetchFolderContents(startPath, false);
 });
+
+window.addEventListener('popstate', (event) => {
+    const path = event.state ? event.state.savedPath : '/';
+    fetchFolderContents(path, false);
+})

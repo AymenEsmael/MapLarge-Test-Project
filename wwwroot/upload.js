@@ -1,3 +1,15 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async (event) => {
+
+            event.preventDefault(); // Prevent the default form submission
+            uploadFiles(); // Call the upload function
+        });
+    } else {
+        console.error('Could not find element with ID "uploadForm".');
+    }
+});
 
 async function uploadFiles() {
     const fileInput = document.getElementById('file-upload');
@@ -13,6 +25,8 @@ async function uploadFiles() {
         formData.append('uploaded_file', file);
     }
 
+    formData.append('path', currentPath); // Append the current path to the form data
+
     try {
         const response = await fetch('/upload', {
             method: 'POST',
@@ -21,7 +35,8 @@ async function uploadFiles() {
 
         if (response.ok) {
             alert('Files uploaded successfully!');
-            // Optionally, you can refresh the folder contents here
+            fileInput.value = ''; // Clear the file input after successful upload
+            //refresh the folder contents here
             fetchFolderContents(currentPath);
         } else {
             const errorText = await response.text();
