@@ -8,18 +8,23 @@
     <!-- For file upload -->
     <form id="uploadForm" action="/upload"  enctype="multipart/form-data">
         <label for="file-upload">Select a file:</label>
-        <input type="file" id="file-upload" name="uploaded_file" accept=".jpg, .jpeg, .png, .pdf" multiple>
+        <input type="file" id="file-upload" name="uploaded_file" accept="*" multiple>
         <button id="sub" type="submit">Upload</button>
     </form>
 
-    <!-- For file download -->
-    <!-- <a href="/files/report.pdf" download>Download Report</a> -->
 
     <!-- For Searching a file -->
     <form id="searchForm" action="/search" >
         <label for="search">Search for a file:</label>
         <input type="text" id="search" name="query" placeholder="Enter file name">
         <button id = "searchButton"type="submit">Search</button>
+    </form>
+
+    <form id="createFrom" action="/create" >
+        <sapn>Create: 
+            <button id="createFolder">Folder</button> 
+            <button id="createFile">File</button>
+        </span>
     </form>
 
     <!-- Data for the current directory -->
@@ -52,13 +57,30 @@
         <button id="backButton">
             Back
         </button>
+        <button id="homeButton">
+            Home
+        </button>
     </div>
+
+    <!-- File Actions -->
+    <dialog id="fileActionModal" style="padding: 20px; border-radius: 8px; text-align: center;">
+        <h3 id="modalFileName">Filename</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button id="btnDownload" type="button">Download</button>
+            <button id="btnOpen" type="button">Open (View in Browser)</button>
+            <button id="btnCopy" type="button">Copy / Move</button>
+            <button id="btnDelete" type="button" style="color: red;">Delete</button>
+            <button id="btnCloseModal" type="button" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </dialog>
     
 
 
     <script src="script.js"></script>
+    <script src="getDir.js"></script>
     <script src="upload.js"></script>
     <script src="search.js"></script>
+    <script src="create.js"></script>
     
 </body>
 </html>

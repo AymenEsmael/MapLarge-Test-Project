@@ -1,61 +1,67 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const folderButton = document.getElementById('folderButton');
+// document.addEventListener('DOMContentLoaded', () => {
+//     const folderButton = document.getElementById('folderButton');
 
-    if (folderButton) {
-        folderButton.addEventListener('click', () => {
-            console.log('Folder button clicked!');
-        });
-    } else {
-        console.error('Could not find element with ID "folderButton".');
-    }
-});
+//     if (folderButton) {
+//         folderButton.addEventListener('click', () => {
+//             console.log('Folder button clicked!');
+//         });
+//     } else {
+//         console.error('Could not find element with ID "folderButton".');
+//     }
+// });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const backButton = document.getElementById('backButton');
+// document.addEventListener('DOMContentLoaded', () => {
+//     const backButton = document.getElementById('backButton');
     
-    if (backButton) {
-        backButton.addEventListener('click', () => {
-            console.log('Back button clicked!');
-        });
-    } else {
-        console.error('Could not find element with ID "backButton".');
-    }
-});
+//     if (backButton) {
+//         backButton.addEventListener('click', () => {
+//             console.log('Back button clicked!');
+//         });
+//     } else {
+//         console.error('Could not find element with ID "backButton".');
+//     }
+// });
 
-let currentPath = '/'
+// let currentPath = '/'
 
-//DOM Elem
-const folderContainer = document.getElementById('folderContainer');
-const infoContainer = document.getElementById('infoContainer');
-const backButton = document.getElementById('backButton');
+// //DOM Elem
+// const folderContainer = document.getElementById('folderContainer');
+// const infoContainer = document.getElementById('infoContainer');
+// const backButton = document.getElementById('backButton');
 
-async function fetchFolderContents(path, pushToHistory=true) {
-    console.log(`Fetching contents for path: ${path}`); // Log the path being fetched
-    try{
-        const response = await fetch(`/api/directory?path=${encodeURI(path)}`);
-        const data = await response.json();
+// async function fetchFolderContents(path, pushToHistory=true) {
+//     console.log(`Fetching contents for path: ${path}`); // Log the path being fetched
+//     try{
+//         const response = await fetch(`/api/directory?path=${encodeURI(path)}`);
+//         const data = await response.json();
 
-        currentPath = path;//set the current path to the new path
+//         currentPath = path;//set the current path to the new path
 
-        if (pushToHistory){
-            const newurl = currentPath === '/' ? '/' : `/?path=${encodeURI(currentPath)}`;
-            window.history.pushState({savedPath: currentPath}, "", newurl);
-        }
+//         if (pushToHistory){
+//             const newurl = currentPath === '/' ? '/' : `/?path=${encodeURI(currentPath)}`;
+//             window.history.pushState({savedPath: currentPath}, "", newurl);
+//         }
         
-        //render the UI with the new contents and stats
-        console.log('Fetched data:', data); // Log the fetched data for debugging
-        renderContents(data.contents);
-        updateStats(data.stats)
+//         //render the UI with the new contents and stats
+//         console.log('Fetched data:', data); // Log the fetched data for debugging
+//         renderContents(data.contents);
+//         updateStats(data.stats)
 
-        backButton.disabled = currentPath === '/';//disable back button if at root
-    }
-    catch (error) {
-        console.error('Error fetching folder contents:', error);
-    }
+//         backButton.disabled = currentPath === '/';//disable back button if at root
+//     }
+//     catch (error) {
+//         console.error('Error fetching folder contents:', error);
+//     }
 
-}
+// }
+
+const fileModal = document.getElementById('fileActionModal');
+const modalFileName = document.getElementById('modalFileName');
+let currentSelectedFilePath = '';
+let currentSelectedFileName = '';
 
 function renderContents(contents) {
+    const folderContainer = document.getElementById('folderContainer')
     folderContainer.innerHTML = ''; // Clear previous contents
 
     folderContainer.style.placeItems = "start";
@@ -71,6 +77,7 @@ function renderContents(contents) {
         folderContainer.style.alignItems = 'center';
 
         const button = document.createElement('button');
+        button.type = 'button';
         button.style.backgroundColor = 'transparent';
         button.style.border = 'none';
         button.style.cursor = 'pointer';
@@ -98,10 +105,23 @@ function renderContents(contents) {
             if(item.type === 'folder'){
                 fetchFolderContents(newPath);
             }
-            else{
-                window.location.href = `/api/file?path=${encodeURI(newPath)}`;
+            // else{
+            //     window.location.href = `/api/file?path=${encodeURI(newPath)}`;
+            // }
+            else if (item.type === 'file') {
+                // button.addEventListener('click', () => {
+                currentSelectedFilePath = newPath;
+                currentSelectedFileName = item.name;
+                modalFileName.textContent = item.name;
+
+                console.log(currentSelectedFileName, newPath, modalFileName.textContent);
+                
+                
+                fileModal.showModal(); 
+                // });
             }
         });
+        
         folderContainer.appendChild(button);
     });
 }
@@ -125,14 +145,50 @@ backButton.addEventListener('click', () => {
     fetchFolderContents(newPath);
 });
 
-// Fetch the initial folder contents when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParam = new URLSearchParams(window.location.search);
-    const startPath = urlParam.get('path') || '/'
-    fetchFolderContents(startPath, false);
-});
+// // Fetch the initial folder contents when the page loads
+// document.addEventListener('DOMContentLoaded', () => {
+//     const urlParam = new URLSearchParams(window.location.search);
+//     const startPath = urlParam.get('path') || '/'
+//     fetchFolderContents(startPath, false);
+// });
 
+//Deep linkable URL
 window.addEventListener('popstate', (event) => {
     const path = event.state ? event.state.savedPath : '/';
     fetchFolderContents(path, false);
 })
+
+const homeButton = document.getElementById('homeButton').addEventListener('click', () => {
+    fetchFolderContents('/');
+});
+
+
+
+
+document.getElementById('btnDownload').addEventListener('click', () => {
+    window.location.href = `/api/file?path=${encodeURI(currentSelectedFilePath)}`;
+    fileModal.close();
+});
+
+document.getElementById('btnOpen').addEventListener('click', async () => {
+    console.log("${currentSelectedFileName}, ${newPath}")
+    window.open(`/api/open?path=${encodeURI(currentSelectedFilePath)}`, '_blank');
+    fileModal.close();
+});
+
+// document.getElementById('btnCopy').addEventListener('click', () => {
+
+// });
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+    const confirmDelete = confirm("Are you sure you wanted to delete ${currentSelectedFileName}")
+    if (confirmDelete){
+        //c# endpoint
+
+        alert("${currentSelectedFileName} has been successfuly deleted")
+    }
+});
+
+document.getElementById('btnCloseModal').addEventListener('click', () => {
+    fileModal.close();
+});
