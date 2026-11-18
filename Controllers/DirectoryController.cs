@@ -7,6 +7,7 @@ namespace TestProject.Controllers
 {
     [ApiController]
     [Route("api/directory")]
+    // [Route("api/file")]
     public class DirectoryController : ControllerBase
     {
         
@@ -23,7 +24,7 @@ namespace TestProject.Controllers
                 var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "storage", relativePath);
                 //The final version ^ for testing keep
                 // var fullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), relativePath));
-                Console.WriteLine($"Full path resolved to: {fullPath}");
+                // Console.WriteLine($"Full path resolved to: {fullPath}");
 
                 var dirInfo = new DirectoryInfo(fullPath);
                 var directories = dirInfo.GetDirectories();//get the directories in the current path
@@ -32,10 +33,10 @@ namespace TestProject.Controllers
                 //clean up the directories and files to remove hidden files and folders
                 var vaildFiles = files.Where(f => !f.Name.StartsWith("."));
                 var vaildDirectories = directories.Where(d => !d.Name.StartsWith("."));
-                Console.WriteLine($"Files found: {string.Join(", ", vaildFiles.Select(f => f.Name))}");
+                // Console.WriteLine($"Files found: {string.Join(", ", vaildFiles.Select(f => f.Name))}");
 
                 long totalSize = vaildFiles.Sum(f => f.Length);//sum the size of all files in the current path
-                Console.WriteLine($"Folders found: {vaildDirectories.Count()}, Files found: {vaildFiles.Count()}, Total size: {totalSize} bytes");
+                //Console.WriteLine($"Folders found: {vaildDirectories.Count()}, Files found: {vaildFiles.Count()}, Total size: {totalSize} bytes");
 
                 //prepare the result to be returned to the client
                 var result = vaildDirectories.Select(d => new
@@ -48,7 +49,7 @@ namespace TestProject.Controllers
                     Type = "file",
                 })).ToList();
 
-                var stats = new
+                var stat = new
                 {
                     totalFolders = vaildDirectories.Count(),
                     totalFiles = vaildFiles.Count(),
@@ -58,7 +59,7 @@ namespace TestProject.Controllers
                 return Ok(new
                 {
                     path = querypath,
-                    stats = stats,
+                    stats = stat,
                     contents = result   
                 });
 
@@ -74,12 +75,14 @@ namespace TestProject.Controllers
             Console.WriteLine($"Formatting {bytes} bytes");
             if (bytes == 0) return "0 Bytes";
 
-            string[] sizes = {"KB", "MB", "GB", "TB"};
+            string[] sizes = {"Bytes", "KB", "MB", "GB", "TB"};
 
             int suffix = (int)Math.Floor(Math.Log(bytes) / Math.Log(1024));
 
-            Console.WriteLine($"Suffix index: {suffix}, Size label: {sizes[suffix - 1]}");
-            return Math.Round(bytes / Math.Pow(1024, suffix), 2) + " " + sizes[suffix - 1];
+            if (suffix >= sizes.Length) suffix = sizes.Length - 1;
+
+            Console.WriteLine($"Suffix index: {suffix}, Size label: {sizes[suffix ]}");
+            return Math.Round(bytes / Math.Pow(1024, suffix), 2) + " " + sizes[suffix];
         }
     }
 }

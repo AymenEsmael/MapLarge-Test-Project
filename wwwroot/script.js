@@ -114,10 +114,10 @@ function renderContents(contents) {
                 currentSelectedFileName = item.name;
                 modalFileName.textContent = item.name;
 
-                console.log(currentSelectedFileName, newPath, modalFileName.textContent);
+                console.log(currentSelectedFileName, currentSelectedFilePath);
                 
                 
-                fileModal.showModal(); 
+                fileModal.showModal(currentSelectedFilePath, currentSelectedFileName); 
                 // });
             }
         });
@@ -171,22 +171,46 @@ document.getElementById('btnDownload').addEventListener('click', () => {
 });
 
 document.getElementById('btnOpen').addEventListener('click', async () => {
-    console.log("${currentSelectedFileName}, ${newPath}")
+    console.log("HIIII: ${currentSelectedFileName}, ${newPath}")
     window.open(`/api/open?path=${encodeURI(currentSelectedFilePath)}`, '_blank');
     fileModal.close();
 });
 
 // document.getElementById('btnCopy').addEventListener('click', () => {
 
+
+// });
+// document.getElementById('btnMove').addEventListener('click', () =>{
+
 // });
 
-document.getElementById('btnDelete').addEventListener('click', () => {
-    const confirmDelete = confirm("Are you sure you wanted to delete ${currentSelectedFileName}")
+// document.getElementById('btnPaste').addEventListener('click', () => {
+
+// });
+
+document.getElementById('btnDelete').addEventListener('click', async () => {
+    const confirmDelete = confirm("Are you sure you wanted to delete " + currentSelectedFileName);
     if (confirmDelete){
         //c# endpoint
-
-        alert("${currentSelectedFileName} has been successfuly deleted")
-    }
+        try{
+            console.log("going to Delete Controller");
+            const response = await fetch(`/api/delete?path=${encodeURI(currentSelectedFilePath)}`, {
+                method:'Delete'
+            });
+            const data = await response.json();
+            console.log(data);
+            
+            if (data.message === "Success"){
+                alert(currentSelectedFileName + " has been successfuly deleted");
+                fileModal.close();
+                fetchFolderContents(currentPath);
+            }
+        }catch(err){
+            // alert("Try again");
+            console.error(err.Message + " something went wrong trying to delete the file");
+            
+            }
+        }
 });
 
 document.getElementById('btnCloseModal').addEventListener('click', () => {
