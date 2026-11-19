@@ -20,8 +20,9 @@
         <button id = "searchButton"type="submit">Search</button>
     </form>
 
+    <!-- For creating a file and a folder -->
     <form id="createFrom" action="/create" >
-        <sapn>Create: 
+        <span>Create: 
             <button id="createFolder">Folder</button> 
             <button id="createFile">File</button>
         </span>
@@ -52,7 +53,7 @@
 
     </div>
 
-    <!-- Navigate back -->
+    <!-- Navigate back or go Home. Also allows for paste -->
     <div id="backButtonContainer" style="position: absolute; bottom: 10px; left: 10px;">
         <button id="backButton">
             Back
@@ -60,7 +61,7 @@
         <button id="homeButton">
             Home
         </button>
-        <button id="btnPaste">
+        <button id="btnPaste" style="display: none;">
             Paste Here
         </button>
     </div>

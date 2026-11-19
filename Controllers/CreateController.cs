@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.IO;
 
 namespace TestProject.Controllers
 {
     [ApiController]
     public class CreateController : ControllerBase
     {
-        [HttpPost("/create")]
+        [HttpPost("/api/create")]
         public IActionResult Create([FromForm] string path, [FromForm] string type)
         {
             if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(type))
@@ -16,10 +14,10 @@ namespace TestProject.Controllers
             }
             try
             {
-                var querypath = Path.Combine(Directory.GetCurrentDirectory(),"storage");
                 var relativePath = path.TrimStart('/');
-                var fullPath = Path.Combine(querypath, relativePath);
+                var fullPath = Path.Combine(Program.HomeDirectory, relativePath);
 
+                //calls the apriorate end point based on the type we are creating
                 if (type.Equals("folder"))
                 {
                     Directory.CreateDirectory(fullPath);

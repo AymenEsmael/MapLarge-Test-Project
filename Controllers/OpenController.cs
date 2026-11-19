@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
-using System;
-using System.IO;
+
 
 namespace TestProject.Controllers
 {
@@ -19,14 +18,13 @@ namespace TestProject.Controllers
 
 
                 var relativePath = path.TrimStart('/');
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(),"storage", relativePath);
-                // string contentType = "application/octet-stream";
-                // string extension = Path.GetExtension(fullPath).ToLower();
-                    
+                var fullPath = Path.Combine(Program.HomeDirectory, relativePath);
+                
+                //gets the extension type of the file to be able to view 
                 var provider = new FileExtensionContentTypeProvider();
                     
-                    // Get the exact type. If it fails (unknown extension), default to text/plain
-                if (!provider.TryGetContentType(fullPath, out string contentType))
+                    //get the exact type. If it fails, default to text/plain
+                if (!provider.TryGetContentType(fullPath, out string? contentType))
                 {
                     contentType = "text/plain"; 
                 }

@@ -15,17 +15,19 @@ async function uploadFiles() {
     const fileInput = document.getElementById('file-upload');
     const files = fileInput.files;
 
+    //no files was selected
     if (files.length === 0) {
         alert('Please select at least one file to upload.');
         return;
     }
 
+    //creates a formData to send to the backend
     const formData = new FormData();
     for (const file of files) {
         formData.append('uploaded_file', file);
     }
 
-    formData.append('path', currentPath); // Append the current path to the form data
+    formData.append('path', currentPath); //append the current path to the form data
 
     try {
         const response = await fetch('/upload', {
@@ -33,6 +35,7 @@ async function uploadFiles() {
             body: formData
         });
 
+        //alert the user if upload was successful
         if (response.ok) {
             alert('Files uploaded successfully!');
             fileInput.value = ''; // Clear the file input after successful upload

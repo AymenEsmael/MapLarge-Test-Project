@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.IO;
 
 namespace TestProject.Controllers
 {
@@ -20,8 +18,8 @@ namespace TestProject.Controllers
                 var relativeSource = sourcePath.TrimStart('/');
                 var relativeDest = destPath.TrimStart('/');
                 
-                var fullSource = Path.Combine(Directory.GetCurrentDirectory(), "storage", relativeSource);
-                var fullDest = Path.Combine(Directory.GetCurrentDirectory(), "storage", relativeDest);
+                var fullSource = Path.Combine(Program.HomeDirectory, relativeSource);
+                var fullDest = Path.Combine(Program.HomeDirectory, relativeDest);
 
                 
 

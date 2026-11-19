@@ -48,12 +48,12 @@ document.getElementById('btnPaste').addEventListener('click', async () => {
         // Call the C# CopyController
         let response = null;
         if (clipboardAction === 'copy'){
-            response = await fetch(`/api/copy?sourcePath=${encodeURI(clipboardFilePath)}&destPath=${encodeURI(destPath)}`, {
+            response = await fetch(`/api/copy?sourcePath=${encodeURIComponent(clipboardFilePath)}&destPath=${encodeURIComponent(destPath)}`, {
                 method: 'POST'
             });
         }
         else if (clipboardAction === 'move'){
-            response = await fetch (`/api/move?sourcePath=${encodeURI(clipboardFilePath)}&destPath=${encodeURI(destPath)}`, {
+            response = await fetch (`/api/move?sourcePath=${encodeURIComponent(clipboardFilePath)}&destPath=${encodeURIComponent(destPath)}`, {
                 method: 'POST'
             });
         }

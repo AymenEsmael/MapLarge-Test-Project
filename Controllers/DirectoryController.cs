@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System;
-using System.Linq;
 
 namespace TestProject.Controllers
 {
@@ -21,11 +18,8 @@ namespace TestProject.Controllers
                 
                 var querypath = string.IsNullOrEmpty(path) ? "/" : path; // Default to root if no path is provided
                 var relativePath = querypath.TrimStart('/'); // Remove leading slash for relative path
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "storage", relativePath);
-                //The final version ^ for testing keep
-                // var fullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), relativePath));
-                // Console.WriteLine($"Full path resolved to: {fullPath}");
-
+                var fullPath = Path.Combine(Program.HomeDirectory, relativePath);
+                
                 var dirInfo = new DirectoryInfo(fullPath);
                 var directories = dirInfo.GetDirectories();//get the directories in the current path
                 var files = dirInfo.GetFiles();//get the files in the current path
@@ -70,6 +64,7 @@ namespace TestProject.Controllers
             }
         }
 
+    //Helper function that calculates the size of the files
     public string ByteFormat(long bytes)
         {
             Console.WriteLine($"Formatting {bytes} bytes");

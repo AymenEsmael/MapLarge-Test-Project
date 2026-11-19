@@ -1,3 +1,4 @@
+//Gets the item to be search and searches it
 document.addEventListener('DOMContentLoaded', () => {
     const search = document.getElementById('searchForm');
 
@@ -12,42 +13,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function searchFiles(){
-    const searchInput = document.getElementById('search');
 
-    // Validate the search input
-    console.log(`Search input value: ${searchInput.value}`); // Log the search input value for debugging
-    if (searchInput.value === null || searchInput.value.length === 0) {
-        alert('Please enter a search query.');
+async function searchFiles(queryOverride=null, pushToHistory=true){
+    const searchInput = document.getElementById('search');
+    const queryData = (queryOverride !== null ? queryOverride : searchInput.value).trim();
+
+    //if search field is empty alert the user
+    if (!queryData){
+        alert("Please enter a search query");
         return;
     }
-    const queryData = searchInput.value.trim();
-    console.log(`Searching for: ${queryData}`); // Log the search query for debugging
+    //gets the value to be search
+    searchInput.value = queryData;
 
     try{
-        const response = await fetch(`/search?query=${encodeURIComponent(queryData)}`);
+        //calls the search c# end point
+        const response = await fetch(`/api/search?query=${encodeURIComponent(queryData)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data)
+        // console.log(data)
 
-        if (data.stats.totalFolders === 0 && data.stats.totalFiles === 0){
-            alert("No item was found");
-            return;
-        }
-        else{
-            alert("The following item was found");
+        //For deep link URL
+        if (pushToHistory) {
+            const newUrl = `/?search=${encodeURIComponent(queryData)}`;
+            window.history.pushState(
+                { savedSearch: queryData },
+                "",
+                newUrl
+            );
         }
 
-        // data.content.map(d => fetchFolderContents(d.path));
         renderContents(data.contents);
         updateStats(data.stats);
-        // document.getElementById('folderName').innerText = `Search Results for "${searchInput.value}"`;
+        backButton.disabled = false;
+
+        //If nothing was found
+        if (data.stats.totalFolders === 0 && data.stats.totalFiles === 0) {
+            alert("No item was found");
+        }
+
         
-    }
-    catch (error){
+    }catch (error){
         console.error('Error searching for files:', error);
     }
-
 }

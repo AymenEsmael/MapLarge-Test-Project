@@ -6,9 +6,10 @@ const infoContainer = document.getElementById('infoContainer');
 const backButton = document.getElementById('backButton');
 
 async function fetchFolderContents(path, pushToHistory=true) {
-    console.log(`Fetching contents for path: ${path}`);
+    // console.log(`Fetching contents for path: ${path}`);
     try{
-        const response = await fetch(`/api/directory?path=${encodeURI(path)}`);
+        //calls the c# end point to get the data of the current directory
+        const response = await fetch(`/api/directory?path=${encodeURIComponent(path)}`);
         const data = await response.json();
         if (!response.ok) {
             console.error("Backend Error:", data.error);
@@ -19,12 +20,12 @@ async function fetchFolderContents(path, pushToHistory=true) {
         currentPath = path;//set the current path to the new path
 
         if (pushToHistory){
-            const newurl = currentPath === '/' ? '/' : `/?path=${encodeURI(currentPath)}`;
+            const newurl = currentPath === '/' ? '/' : `/?path=${encodeURIComponent(currentPath)}`;
             window.history.pushState({savedPath: currentPath}, "", newurl);
         }
         
         //render the UI with the new contents and stats
-        console.log('Fetched data:', data); //for debugging
+        // console.log('Fetched data:', data); //for debugging
         renderContents(data.contents);
         updateStats(data.stats)
 
@@ -39,6 +40,12 @@ async function fetchFolderContents(path, pushToHistory=true) {
 // Fetch the initial folder contents when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     const urlParam = new URLSearchParams(window.location.search);
+    const searchQuery = urlParam.get('search');
     const startPath = urlParam.get('path') || '/'
-    fetchFolderContents(startPath, false);
+    if (searchQuery){
+        searchFiles(searchQuery,false);
+    }
+    else{
+        fetchFolderContents(startPath, false);
+    } 
 });

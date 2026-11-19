@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TestProject.Controllers
 {
     [ApiController]
-    [Route("/search")]
+    [Route("/api/search")]
 
     public class SearchController : ControllerBase
     {
@@ -15,27 +15,31 @@ namespace TestProject.Controllers
             if (string.IsNullOrWhiteSpace(query)) return BadRequest("Search can not be empty");
             try
             {
+                //to recalculate the size of the files as a result of the search
                 DirectoryController dController = new DirectoryController();
-                var searchPath = Path.Combine(Directory.GetCurrentDirectory(), "storage"); // Start searching from the storage directory
-                string[] matchingFiles = Directory.GetFiles(searchPath, $"*{query}*", SearchOption.AllDirectories);
-                string[] matchingDirectories = Directory.GetDirectories(searchPath, $"*{query}*", SearchOption.AllDirectories);
 
+                var searchPath = Program.HomeDirectory; // Start searching from the storage directory
+                string[] matchingFiles = Directory.GetFiles(searchPath, $"*{query}*", SearchOption.AllDirectories).Where(f => !Path.GetFileName(f).StartsWith(".")).ToArray();
+                string[] matchingDirectories = Directory.GetDirectories(searchPath, $"*{query}*", SearchOption.AllDirectories).Where(d => !Path.GetFileName(d).StartsWith(".")).ToArray();
+
+                //gets the size of the files
                 long totalSize = matchingFiles.Sum(f => new FileInfo(f).Length);
                 
                 var result = matchingFiles.Select(f => new
                 {
                     Name = Path.GetFileName(f),
                     Type = "file",
-                    path = "/" + Path.GetRelativePath(searchPath,f)
+                    path = "/" + Path.GetRelativePath(searchPath,f).Replace("\\", "/")
                 }).Concat(matchingDirectories.Select(d => new
                 {
                     Name = Path.GetFileName(d),
                     Type = "folder",
-                    path =  "/" + Path.GetRelativePath(searchPath,d)
+                    path =  "/" + Path.GetRelativePath(searchPath,d).Replace("\\","/")
                 })).ToList();
 
-                Console.WriteLine("SEARCH CONTROLLER: " +   result);
+                // Console.WriteLine("SEARCH CONTROLLER: " +   result);
 
+                //prep the json to return
                 var stat = new
                 {
                     totalFolders = matchingDirectories.Length,

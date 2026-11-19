@@ -1,81 +1,28 @@
-// document.addEventListener('DOMContentLoaded', () => {
-//     const folderButton = document.getElementById('folderButton');
 
-//     if (folderButton) {
-//         folderButton.addEventListener('click', () => {
-//             console.log('Folder button clicked!');
-//         });
-//     } else {
-//         console.error('Could not find element with ID "folderButton".');
-//     }
-// });
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     const backButton = document.getElementById('backButton');
-    
-//     if (backButton) {
-//         backButton.addEventListener('click', () => {
-//             console.log('Back button clicked!');
-//         });
-//     } else {
-//         console.error('Could not find element with ID "backButton".');
-//     }
-// });
-
-// let currentPath = '/'
-
-// //DOM Elem
-// const folderContainer = document.getElementById('folderContainer');
-// const infoContainer = document.getElementById('infoContainer');
-// const backButton = document.getElementById('backButton');
-
-// async function fetchFolderContents(path, pushToHistory=true) {
-//     console.log(`Fetching contents for path: ${path}`); // Log the path being fetched
-//     try{
-//         const response = await fetch(`/api/directory?path=${encodeURI(path)}`);
-//         const data = await response.json();
-
-//         currentPath = path;//set the current path to the new path
-
-//         if (pushToHistory){
-//             const newurl = currentPath === '/' ? '/' : `/?path=${encodeURI(currentPath)}`;
-//             window.history.pushState({savedPath: currentPath}, "", newurl);
-//         }
-        
-//         //render the UI with the new contents and stats
-//         console.log('Fetched data:', data); // Log the fetched data for debugging
-//         renderContents(data.contents);
-//         updateStats(data.stats)
-
-//         backButton.disabled = currentPath === '/';//disable back button if at root
-//     }
-//     catch (error) {
-//         console.error('Error fetching folder contents:', error);
-//     }
-
-// }
-
+// variables to be manipulated
 const fileModal = document.getElementById('fileActionModal');
 const modalFileName = document.getElementById('modalFileName');
 let currentSelectedFilePath = '';
 let currentSelectedFileName = '';
+let currentSelectedType = '';
 
+// render the web page based on the new contents fetched by the backend
 function renderContents(contents) {
     const folderContainer = document.getElementById('folderContainer')
     folderContainer.innerHTML = ''; // Clear previous contents
 
+    //Styling for the content
     folderContainer.style.placeItems = "start";
     folderContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(100px, 1fr))";
     folderContainer.style.gap = "20px";
     folderContainer.style.padding = "20px"; 
+    folderContainer.style.display = 'grid';
+    folderContainer.style.justifyContent = 'center';
+    folderContainer.style.alignItems = 'center';
 
-
+    //for each item fetched
     contents.forEach(item => {
-        const folderContainer = document.getElementById('folderContainer');
-        folderContainer.style.display = 'grid';
-        folderContainer.style.justifyContent = 'center';
-        folderContainer.style.alignItems = 'center';
-
+        
         const button = document.createElement('button');
         button.type = 'button';
         button.style.backgroundColor = 'transparent';
@@ -87,7 +34,10 @@ function renderContents(contents) {
         button.style.gap = '10px';
         button.style.width = '120px';
 
+        //checks if the item is a folder or a file and gets the appropirte icon
         const icon = item.type === 'folder'? 'foldericon.png' : 'fileicon.png'; // Replace with actual icon paths
+
+        //Dynamically names the file based on what was fetched
         button.innerHTML =
         `
         <img src="${icon}" alt="${item.name}" style="width: 50px; height: auto;">
@@ -98,35 +48,42 @@ function renderContents(contents) {
             ${item.name}
         </p>
         `;
-
+        
+        const newPath = item.path ? item.path : (currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`);
         //Navigate to folder or download file on click
         button.addEventListener('click', () => {
-            const newPath = item.path ? item.path : (currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`);
             if(item.type === 'folder'){
                 fetchFolderContents(newPath);
             }
-            // else{
-            //     window.location.href = `/api/file?path=${encodeURI(newPath)}`;
-            // }
             else if (item.type === 'file') {
-                // button.addEventListener('click', () => {
+                
                 currentSelectedFilePath = newPath;
                 currentSelectedFileName = item.name;
+                currentSelectedType = 'file';
                 modalFileName.textContent = item.name;
 
-                console.log(currentSelectedFileName, currentSelectedFilePath);
-                
+                // console.log(currentSelectedFileName, currentSelectedFilePath);
                 
                 fileModal.showModal(currentSelectedFilePath, currentSelectedFileName); 
-                // });
             }
         });
-        
+
+        //Right click to delete a folder
+        if (item.type === 'folder') {
+            button.title = `${item.name} (Right-click to delete)`;
+            button.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                currentSelectedFilePath = newPath;
+                currentSelectedFileName = item.name;
+                currentSelectedType = 'folder';
+                document.getElementById('btnDelete').click();
+            });
+        }
         folderContainer.appendChild(button);
     });
 }
 
-
+// updates the states on the current screen
 function updateStats(stats){
     infoContainer.innerHTML = `
         <p>Total Folders: ${stats.totalFolders > 0 ? stats.totalFolders : 0}</p>
@@ -135,66 +92,64 @@ function updateStats(stats){
     `;
 }
 
+
 backButton.addEventListener('click', () => {
+    if (new URLSearchParams(window.location.search).has('search')){
+        fetchFolderContents(currentPath);
+        return;
+    }
     if (currentPath === '/') return; // Already at root, do nothing
 
     const pathSplit = currentPath.split('/');
     pathSplit.pop();
-    const newPath = pathSplit.join('/') || '/'; // Ensure we don't end up with an empty string
+    const newPath = pathSplit.join('/') || '/'; // ensure we don't end up with an empty string
     
     fetchFolderContents(newPath);
 });
 
-// // Fetch the initial folder contents when the page loads
-// document.addEventListener('DOMContentLoaded', () => {
-//     const urlParam = new URLSearchParams(window.location.search);
-//     const startPath = urlParam.get('path') || '/'
-//     fetchFolderContents(startPath, false);
-// });
 
 //Deep linkable URL
 window.addEventListener('popstate', (event) => {
-    const path = event.state ? event.state.savedPath : '/';
-    fetchFolderContents(path, false);
+    const urlParam = new URLSearchParams(window.location.search);
+    const searchQuery = (event.state && event.state.savedSearch) || urlParam.get('search');
+    const path = (event.state && event.state.savedPath) || urlParam.get('path') || '/';
+
+    if (searchQuery) {
+        searchFiles(searchQuery, false);
+    } else {
+        fetchFolderContents(path, false);
+    }
 })
 
+//Home button takes us to the Starting/Home directory
 const homeButton = document.getElementById('homeButton').addEventListener('click', () => {
     fetchFolderContents('/');
 });
 
 
-
-
+//Downloads the file
 document.getElementById('btnDownload').addEventListener('click', () => {
-    window.location.href = `/api/file?path=${encodeURI(currentSelectedFilePath)}`;
-    fileModal.close();
+    window.location.href = `/api/file?path=${encodeURIComponent(currentSelectedFilePath)}`;
+    fileModal.close();//closes the pop up window after clicking the file
 });
 
+//Opens the file
 document.getElementById('btnOpen').addEventListener('click', async () => {
     console.log("HIIII: ${currentSelectedFileName}, ${newPath}")
-    window.open(`/api/open?path=${encodeURI(currentSelectedFilePath)}`, '_blank');
+    window.open(`/api/open?path=${encodeURIComponent(currentSelectedFilePath)}`, '_blank');
     fileModal.close();
 });
 
-// document.getElementById('btnCopy').addEventListener('click', () => {
 
-
-// });
-// document.getElementById('btnMove').addEventListener('click', () =>{
-
-// });
-
-// document.getElementById('btnPaste').addEventListener('click', () => {
-
-// });
-
+//Deletes file and folder
 document.getElementById('btnDelete').addEventListener('click', async () => {
+    //confirms before deleting
     const confirmDelete = confirm("Are you sure you wanted to delete " + currentSelectedFileName);
     if (confirmDelete){
-        //c# endpoint
         try{
-            console.log("going to Delete Controller");
-            const response = await fetch(`/api/delete?path=${encodeURI(currentSelectedFilePath)}`, {
+            // console.log("going to Delete Controller");
+            //calls the c# delete end point
+            const response = await fetch(`/api/delete?path=${encodeURIComponent(currentSelectedFilePath)}&type=${encodeURIComponent(currentSelectedType)}`, {
                 method:'Delete'
             });
             const data = await response.json();
@@ -207,12 +162,13 @@ document.getElementById('btnDelete').addEventListener('click', async () => {
             }
         }catch(err){
             // alert("Try again");
-            console.error(err.Message + " something went wrong trying to delete the file");
+            console.error(err.message + " something went wrong trying to delete the file");
             
             }
         }
 });
 
+//closing the menu
 document.getElementById('btnCloseModal').addEventListener('click', () => {
     fileModal.close();
 });
