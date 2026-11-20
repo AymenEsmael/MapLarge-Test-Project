@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <!-- For file upload -->
+    <form id="uploadForm" action="/upload"  enctype="multipart/form-data">
+        <label for="file-upload">Select a file:</label>
+        <input type="file" id="file-upload" name="uploaded_file" accept="*" multiple>
+        <button id="sub" type="submit">Upload</button>
+    </form>
+
+
+    <!-- For Searching a file -->
+    <form id="searchForm" action="/search" >
+        <label for="search">Search for a file:</label>
+        <input type="text" id="search" name="query" placeholder="Enter file name">
+        <button id = "searchButton"type="submit">Search</button>
+    </form>
+
+    <!-- For creating a file and a folder -->
+    <form id="createFrom" action="/create" >
+        <span>Create: 
+            <button id="createFolder">Folder</button> 
+            <button id="createFile">File</button>
+        </span>
+    </form>
+
+    <!-- Data for the current directory -->
+    <div id="infoContainer" style="position: absolute; top: 10px; right: 10px;"> 
+        <ul>
+            <li>Number of Folders: 0</li>
+            <li>Number of Files: 0</li>
+            <li>Size: 0</li>
+        </ul>
+    </div>
+
+    <!-- Content of a directory, either a folder or a file -->
+    <div id="folderContainer" style="display: grid; place-items: center; height: 100vh;">
+
+        <button id="folderButton" style="background-color: transparent; border: none; cursor: pointer;">
+            <img src="foldericon.png" alt="Folder Icon" style="width: 100%; height: auto"/>
+            <p 
+            id="folderName" 
+            style="position:absolute; top:55%; left: 50%; transform: translate(-50%, -50%); 
+            text-align: center; width: 90%; overflow: hidden; text-overflow: ellipsis; 
+            white-space: nowrap; font-weight: bold;">
+                Home
+            </p>
+        </button>
+
+    </div>
+
+    <!-- Navigate back or go Home. Also allows for paste -->
+    <div id="backButtonContainer" style="position: absolute; bottom: 10px; left: 10px;">
+        <button id="backButton">
+            Back
+        </button>
+        <button id="homeButton">
+            Home
+        </button>
+        <button id="btnPaste" style="display: none;">
+            Paste Here
+        </button>
+    </div>
+
+    <!-- File Actions -->
+    <dialog id="fileActionModal" style="padding: 20px; border-radius: 8px; text-align: center;">
+        <h3 id="modalFileName">Filename</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button id="btnDownload" type="button">Download</button>
+            <button id="btnOpen" type="button">Open (View in Browser)</button>
+            <button id="btnCopy" type="button">Copy</button>
+            <button id="btnMove" type="button">Cut/Move</button>
+            <button id="btnDelete" type="button" style="color: red;">Delete</button>
+            <button id="btnCloseModal" type="button" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </dialog>
+    
+
+
+    <script src="script.js"></script>
+    <script src="getDir.js"></script>
+    <script src="upload.js"></script>
+    <script src="search.js"></script>
+    <script src="create.js"></script>
+    <script src="copy.js"></script>
+    
+</body>
+</html>
