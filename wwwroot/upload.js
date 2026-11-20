@@ -30,7 +30,7 @@ async function uploadFiles() {
     formData.append('path', currentPath); //append the current path to the form data
 
     try {
-        const response = await fetch('/upload', {
+        const response = await fetch('/api/upload', {
             method: 'POST',
             body: formData
         });

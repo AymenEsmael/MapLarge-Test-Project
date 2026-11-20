@@ -10,7 +10,7 @@ namespace TestProject {
             HomeDirectory = Path.GetFullPath(configuredDir, Directory.GetCurrentDirectory());
             Directory.CreateDirectory(HomeDirectory);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(); 
 
             var app = builder.Build();
 

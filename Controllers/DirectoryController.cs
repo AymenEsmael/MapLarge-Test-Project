@@ -12,7 +12,7 @@ namespace TestProject.Controllers
     [HttpGet]
     public IActionResult GetDirectoryContents([FromQuery] string path = "/")
         {
-            Console.WriteLine($"Received request for path: {path}");
+            // Console.WriteLine($"Received request for path: {path}");
             try
             {
                 
@@ -67,7 +67,7 @@ namespace TestProject.Controllers
     //Helper function that calculates the size of the files
     public string ByteFormat(long bytes)
         {
-            Console.WriteLine($"Formatting {bytes} bytes");
+            // Console.WriteLine($"Formatting {bytes} bytes");
             if (bytes == 0) return "0 Bytes";
 
             string[] sizes = {"Bytes", "KB", "MB", "GB", "TB"};
@@ -76,7 +76,7 @@ namespace TestProject.Controllers
 
             if (suffix >= sizes.Length) suffix = sizes.Length - 1;
 
-            Console.WriteLine($"Suffix index: {suffix}, Size label: {sizes[suffix ]}");
+            // Console.WriteLine($"Suffix index: {suffix}, Size label: {sizes[suffix ]}");
             return Math.Round(bytes / Math.Pow(1024, suffix), 2) + " " + sizes[suffix];
         }
     }

@@ -1,6 +1,6 @@
 let clipboardFilePath = null;
 let clipboardFileName = null;
-let clipboardAction = null;
+let clipboardAction = null; //copy or move
 
 document.getElementById('btnCopy').addEventListener('click', () => {
     //Save to virtual clipboard
